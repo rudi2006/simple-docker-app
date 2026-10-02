@@ -46,7 +46,7 @@ jobs:
         with:
           context: ./backend/simpleapi
           push: false
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-simple-api:latest
+          tags:  tp-devops-simple-api:latest
 
       # Build the database Docker image
       - name: Build database image
@@ -54,7 +54,7 @@ jobs:
         with:
           context: ./database
           push: false
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+          tags: tp-devops-database:latest
 
       # Build the HTTPD Docker image
       - name: Build httpd image
@@ -62,4 +62,4 @@ jobs:
         with:
           context: ./httpd
           push: false
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+          tags: tp-devops-httpd:latest
