@@ -1,37 +1,33 @@
 name: CI devops 2025
 
 on:
-  # Run the CI when code is pushed to these branches
   push:
     branches:
       - master
       - develop
 
-  # Also run the CI when a Pull Request is created/updated
   pull_request:
 
 jobs:
+
   test-backend:
     runs-on: ubuntu-24.04
 
     steps:
-      # Download the repository code onto the GitHub runner
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install and configure Java 21
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      # Build the application and execute the tests
       - name: Build and test with Maven
         run: mvn clean verify --file ./backend/simpleapi/pom.xml
 
-  # Build our Docker images only after the backend tests succeed
-  build-and-push-docker-image:
+
+  build-backend:
     needs: test-backend
     runs-on: ubuntu-24.04
 
@@ -39,29 +35,62 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push backend image
+      - name: Build backend image
         uses: docker/build-push-action@v6
         with:
           context: ./backend/simpleapi
-          push: ${{ github.ref == 'refs/heads/master' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-simple-api:latest
+          push: false
+          tags: tp-devops-simple-api:latest
+          outputs: type=docker,dest=/tmp/backend.tar
 
-      - name: Build and push database image
+      - name: Upload backend image
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-image
+          path: /tmp/backend.tar
+
+
+  build-database:
+    needs: test-backend
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build database image
         uses: docker/build-push-action@v6
         with:
           context: ./database
-          push: ${{ github.ref == 'refs/heads/master' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+          push: false
+          tags: tp-devops-database:latest
+          outputs: type=docker,dest=/tmp/database.tar
 
-      - name: Build and push httpd image
+      - name: Upload database image
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-image
+          path: /tmp/database.tar
+
+
+  build-httpd:
+    needs: test-backend
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build httpd image
         uses: docker/build-push-action@v6
         with:
           context: ./httpd
-          push: ${{ github.ref == 'refs/heads/master' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+          push: false
+          tags: tp-devops-httpd:latest
+          outputs: type=docker,dest=/tmp/httpd.tar
+
+      - name: Upload httpd image
+        uses: actions/upload-artifact@v4
+        with:
+          name: httpd-image
+          path: /tmp/httpd.tar
