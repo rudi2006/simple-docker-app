@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -41,7 +41,7 @@ jobs:
           context: ./backend/simpleapi
           push: false
           tags: tp-devops-simple-api:latest
-          outputs: type=docker,dest=/tmp/backend.tar
+          outputs: type=oci,dest=/tmp/backend.tar
 
       - name: Upload backend image
         uses: actions/upload-artifact@v4
@@ -64,7 +64,7 @@ jobs:
           context: ./database
           push: false
           tags: tp-devops-database:latest
-          outputs: type=docker,dest=/tmp/database.tar
+          outputs: type=oci,dest=/tmp/database.tar
 
       - name: Upload database image
         uses: actions/upload-artifact@v4
@@ -87,7 +87,7 @@ jobs:
           context: ./httpd
           push: false
           tags: tp-devops-httpd:latest
-          outputs: type=docker,dest=/tmp/httpd.tar
+          outputs: type=oci,dest=/tmp/httpd.tar
 
       - name: Upload httpd image
         uses: actions/upload-artifact@v4
