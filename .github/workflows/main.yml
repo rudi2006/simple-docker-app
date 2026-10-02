@@ -1,0 +1,31 @@
+name: CI devops 2025
+
+on:
+  # Run the CI when code is pushed to these branches
+  push:
+    branches:
+      - main
+      - develop
+
+  # Also run the CI when a Pull Request is created/updated
+  pull_request:
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-24.04
+
+    steps:
+      # Download the repository code onto the GitHub runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install and configure Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Build the application and execute the tests
+      - name: Build and test with Maven
+        run: mvn clean verify --file ./backend/simpleapi/pom.xml
