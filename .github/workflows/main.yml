@@ -4,7 +4,7 @@ on:
   # Run the CI when code is pushed to these branches
   push:
     branches:
-      - main
+      - master
       - develop
 
   # Also run the CI when a Pull Request is created/updated
