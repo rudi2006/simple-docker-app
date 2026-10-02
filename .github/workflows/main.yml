@@ -29,3 +29,37 @@ jobs:
       # Build the application and execute the tests
       - name: Build and test with Maven
         run: mvn clean verify --file ./backend/simpleapi/pom.xml
+
+  # Build our Docker images only after the backend tests succeed
+  build-and-push-docker-image:
+    needs: test-backend
+    runs-on: ubuntu-24.04
+
+    steps:
+      # Get the source code onto the GitHub runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Build the backend Docker image
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend/simpleapi
+          push: false
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-simple-api:latest
+
+      # Build the database Docker image
+      - name: Build database image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./database
+          push: false
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+
+      # Build the HTTPD Docker image
+      - name: Build httpd image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./httpd
+          push: false
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
