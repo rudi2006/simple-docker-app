@@ -1,0 +1,28 @@
+---
+- name: Pull latest backend image
+  community.docker.docker_image:
+    name: "{{ backend_image }}"
+    source: pull
+
+- name: Create backend instances
+  community.docker.docker_container:
+    name: "{{ item }}"
+    image: "{{ backend_image }}"
+    state: started
+    recreate: true
+    restart_policy: unless-stopped
+    networks:
+      - name: frontend-network
+      - name: backend-network
+    env:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://database:5432/{{ postgres_db }}"
+      SPRING_DATASOURCE_USERNAME: "{{ postgres_user }}"
+      SPRING_DATASOURCE_PASSWORD: "{{ postgres_password }}"
+  loop:
+    - backend-1
+    - backend-2
+
+- name: Remove legacy single backend container
+  community.docker.docker_container:
+    name: backend
+    state: absent
